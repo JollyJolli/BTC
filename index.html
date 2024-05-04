@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitcoin Price</title>
+<style>
+    @font-face {
+        font-family: 'Monocraft';
+        src: url('Monocraft.ttf') format('truetype');
+        /* Ajusta la ruta según la ubicación de tu archivo de fuente */
+    }
+
+    body {
+        background-color: #ffffff; /* Fondo blanco */
+        font-family: 'Monocraft', sans-serif; /* Fuente Monocraft como alternativa */
+        display: flex;
+        justify-content: center; /* Centrado horizontal */
+        align-items: center; /* Centrado vertical */
+        height: 100vh; /* Altura del viewport */
+        cursor: url('mouse.png') 10 10, auto; /* Cursor personalizado */
+    }
+    #bitcoin-price {
+        font-size: 48px; /* Tamaño grande */
+        color: #000000; /* Texto negro */
+        transition: color 0.5s ease; /* Transición de color */
+    }
+    #bitcoin-price:hover {
+        color: #8a2be2; /* Cambio de color a morado */
+    }
+    #bitcoin-price.green {
+        color: #00ff00; /* Texto verde */
+    }
+    #bitcoin-price.red {
+        color: #ff0000; /* Texto rojo */
+    }
+</style>
+</head>
+<body>
+<div id="bitcoin-price">Loading...</div>
+
+<script>
+    // Función para cargar y mostrar el precio de Bitcoin
+    function loadBitcoinPrice() {
+        fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
+        .then(response => response.json())
+        .then(data => {
+            const bitcoinPrice = parseFloat(data.bpi.USD.rate.replace(",", "")); // Obtener el precio de Bitcoin en USD
+            const bitcoinPriceElement = document.getElementById('bitcoin-price');
+            const currentPrice = parseFloat(bitcoinPriceElement.textContent.substring(bitcoinPriceElement.textContent.indexOf("$")+1));
+            if (bitcoinPrice > currentPrice) {
+                bitcoinPriceElement.classList.remove('red');
+                bitcoinPriceElement.classList.add('green');
+            } else if (bitcoinPrice < currentPrice) {
+                bitcoinPriceElement.classList.remove('green');
+                bitcoinPriceElement.classList.add('red');
+            }
+            bitcoinPriceElement.textContent = `$${bitcoinPrice}`; // Mostrar el precio sin "Bitcoin Price"
+            setTimeout(() => {
+                bitcoinPriceElement.classList.remove('green', 'red');
+            }, 2000); // Remover las clases después de 2 segundos
+        })
+        .catch(error => {
+            console.error('Error fetching Bitcoin price:', error);
+            document.getElementById('bitcoin-price').textContent = 'Error loading Bitcoin price'; // Manejo de errores
+        });
+    }
+
+    // Cargar el precio de Bitcoin al cargar la página
+    document.addEventListener('DOMContentLoaded', loadBitcoinPrice);
+
+    // Actualizar el precio de Bitcoin cada 30 segundos
+    setInterval(loadBitcoinPrice, 30000); // 30000 milisegundos = 30 segundos
+</script>
+</body>
+</html>
